@@ -1,10 +1,10 @@
 package com.example.Gamearena.model;
 
+//representa la tabla VIDEOJUEGO.
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import java.util.List;
 
 @Entity
 public class Videojuegos {
@@ -13,4 +13,8 @@ public class Videojuegos {
     private Long id;
     private String nombre;
     private String genero;
+    // En Jugador
+    @OneToMany(mappedBy = "jugador")
+    @JsonIgnore
+    private List<Participantes> participaciones;
 }

@@ -1,10 +1,11 @@
 package com.example.Gamearena.model;
+// Entidad- representa la tabla JUGADOR en la base de datos.
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-    @Entity
+import java.util.List;
+
+@Entity
     public class Jugador {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,5 +13,7 @@ import jakarta.persistence.Id;
         private String nick;
         private String email;
         private int nivel;
-        // constructor vacío, getters y setters
-    }
+    @OneToMany(mappedBy = "jugador")
+    @JsonIgnore
+    private List<Participantes> participantes;
+}
