@@ -20,9 +20,10 @@ public class Torneo {
     //Muchos videojuegos puede tener un torneo//
 @ManyToOne
 @JoinColumn(name = "videojuego_id")
-private Videojuegos videojuegos;
+private Videojuegos videojuego;
 //un torneo puede tener muchos participantes//ñ
     @OneToMany(mappedBy = "torneo")
     @JsonIgnore
     private List<Participantes> participaciones;
+
 }
