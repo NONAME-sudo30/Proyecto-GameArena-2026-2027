@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 
 //Entidad participantes
 @Entity
-public class Participantes {
+public class Participación {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
