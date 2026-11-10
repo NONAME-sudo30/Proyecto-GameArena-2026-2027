@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GameArena · Torneos de videojuegos</title>
+    <style>
+        :root {
+            --fondo:#eef1f8; --tinta:#14173b; --suave:#5a5f85; --linea:#d3d8ea; --blanco:#fff;
+            --acento:#3d4dff; --abierto:#0b8f6a; --curso:#b86b00; --final:#6b7088; --error:#b3261e;
+        }
+        * { box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { margin:0; background:var(--fondo); color:var(--tinta); font-family:system-ui, "Segoe UI", sans-serif; line-height:1.55; }
+        a { color:inherit; }
+
+        #aviso { display:none; position:sticky; top:0; z-index:10; padding:.7rem 1rem; font-weight:600; background:#fde8e6; color:var(--error); border-bottom:2px solid var(--error); }
+        #aviso.visible { display:block; }
+
+        nav { display:flex; justify-content:space-between; align-items:center; padding:1rem clamp(1rem,5vw,4rem); }
+        nav strong { font-size:1.25rem; letter-spacing:-.02em; }
+        nav div { display:flex; gap:1.4rem; }
+        nav a { text-decoration:none; font-weight:600; }
+        nav a:hover { color:var(--acento); }
+
+        .hero { padding:clamp(2rem,7vw,5rem) clamp(1rem,5vw,4rem) 2rem; max-width:1100px; }
+        .hero h1 { margin:0 0 1rem; font-size:clamp(2.4rem,7vw,5rem); line-height:1; letter-spacing:-.04em; font-weight:900; }
+        .hero p { margin:0 0 1.5rem; max-width:34rem; font-size:1.15rem; color:var(--suave); }
+        .boton { display:inline-block; padding:.7rem 1.3rem; border-radius:999px; background:var(--acento); color:#fff; font-weight:700; text-decoration:none; }
+        .boton:hover { background:var(--tinta); }
+
+        section { padding:2.5rem clamp(1rem,5vw,4rem); max-width:1200px; }
+        h2 { margin:0 0 1rem; font-size:1.8rem; letter-spacing:-.02em; }
+
+        .filtros { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:1.2rem; }
+        .filtros button { font:inherit; font-weight:600; padding:.45rem 1rem; border-radius:999px; border:2px solid var(--linea); background:var(--blanco); color:var(--tinta); cursor:pointer; }
+        .filtros button[aria-pressed="true"] { background:var(--tinta); border-color:var(--tinta); color:#fff; }
+        button:focus-visible, input:focus-visible, a:focus-visible { outline:3px solid var(--acento); outline-offset:2px; }
+
+        .rejilla { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:1rem; }
+        .torneo { background:var(--blanco); border-radius:14px; padding:1.1rem 1.2rem; border-left:8px solid var(--final); display:flex; flex-direction:column; gap:.4rem; }
+        .torneo.ABIERTO { border-left-color:var(--abierto); }
+        .torneo.EN_CURSO { border-left-color:var(--curso); }
+        .torneo h3 { margin:0; font-size:1.2rem; }
+        .torneo .juego { margin:0; color:var(--suave); }
+        .estado { font-weight:700; font-size:.9rem; }
+        .ABIERTO .estado { color:var(--abierto); }
+        .EN_CURSO .estado { color:var(--curso); }
+        .FINALIZADO .estado { color:var(--final); }
+        .inscritos { margin:.4rem 0 0; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:.35rem; }
+        .inscritos li { background:var(--fondo); border-radius:6px; padding:.1rem .55rem; font-size:.88rem; }
+
+        .buscador { display:flex; gap:.5rem; margin-bottom:1.2rem; flex-wrap:wrap; }
+        .buscador input { font:inherit; padding:.55rem .9rem; border:2px solid var(--linea); border-radius:999px; min-width:min(100%,18rem); }
+        .buscador button { font:inherit; font-weight:700; padding:.55rem 1.2rem; border-radius:999px; border:0; background:var(--acento); color:#fff; cursor:pointer; }
+        .videojuego { background:var(--blanco); border-radius:14px; padding:1rem 1.2rem; }
+        .videojuego h3 { margin:0; font-size:1.1rem; }
+        .videojuego p { margin:0; color:var(--suave); }
+        .vacio { color:var(--suave); }
+
+        footer { padding:2rem clamp(1rem,5vw,4rem); color:var(--suave); font-size:.9rem; }
+    </style>
+</head>
+<body>
+<div id="aviso" role="alert"></div>
+
+<nav>
+    <strong>GameArena</strong>
+    <div><a href="#torneos">Torneos</a><a href="#videojuegos">Videojuegos</a></div>
+</nav>
+
+<header class="hero">
+    <h1>Juega. Compite. Sube en la clasificación.</h1>
+    <p>Mira qué torneos están abiertos, quién se ha apuntado y en qué videojuegos puedes competir.</p>
+    <a class="boton" href="#torneos">Ver torneos</a>
+</header>
+
+<main>
+    <section id="torneos">
+        <h2>Torneos</h2>
+        <!-- GET /torneos  ·  GET /torneos/estado/{estado} -->
+        <div class="filtros" id="filtros">
+            <button type="button" data-estado="" aria-pressed="true">Todos</button>
+            <button type="button" data-estado="ABIERTO" aria-pressed="false">Abiertos</button>
+            <button type="button" data-estado="EN_CURSO" aria-pressed="false">En curso</button>
+            <button type="button" data-estado="FINALIZADO" aria-pressed="false">Finalizados</button>
+        </div>
+        <!-- GET /participaciones (para mostrar los inscritos de cada torneo) -->
+        <div class="rejilla" id="lista-torneos"></div>
+    </section>
+
+    <section id="videojuegos">
+        <h2>Videojuegos</h2>
+        <!-- GET /videojuegos/buscar?nombre=  ·  GET /videojuegos -->
+        <form class="buscador" id="form-buscar">
+            <input id="buscar" type="search" placeholder="Busca un videojuego" aria-label="Buscar videojuego">
+            <button type="submit">Buscar</button>
+        </form>
+        <div class="rejilla" id="lista-videojuegos"></div>
+    </section>
+</main>
+
+<footer>GameArena · IES Juan García Valdemora</footer>
+
+<script src="web.js"></script>
+</body>
+</html>

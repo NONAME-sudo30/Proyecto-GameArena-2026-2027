@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GameArena · Gestión</title>
+    <style>
+        :root { --fondo:#f6f7f9; --tarjeta:#fff; --texto:#1c2430; --suave:#5d6b7c; --linea:#d9dee5; --acento:#1f5fbf; --peligro:#b3261e; --ok:#1e7a46; }
+        * { box-sizing: border-box; }
+        body { margin:0; font-family: system-ui, sans-serif; background:var(--fondo); color:var(--texto); line-height:1.5; }
+        header { padding:1.2rem 1.5rem; background:var(--texto); color:#fff; }
+        header h1 { margin:0; font-size:1.4rem; }
+        main { max-width:960px; margin:0 auto; padding:1rem; display:grid; gap:1.2rem; }
+        section { background:var(--tarjeta); border:1px solid var(--linea); border-radius:8px; padding:1rem 1.2rem; }
+        h2 { margin:0 0 .8rem; font-size:1.15rem; }
+        form { display:flex; flex-wrap:wrap; gap:.5rem; align-items:end; margin-bottom:.8rem; }
+        label { display:flex; flex-direction:column; font-size:.85rem; color:var(--suave); gap:.15rem; }
+        input, select, button { font:inherit; padding:.4rem .6rem; border:1px solid var(--linea); border-radius:5px; }
+        button { background:var(--acento); color:#fff; border-color:var(--acento); cursor:pointer; }
+        button.sec { background:#fff; color:var(--acento); }
+        button.borrar { background:#fff; color:var(--peligro); border-color:var(--peligro); }
+        button:focus-visible, input:focus-visible, select:focus-visible { outline:2px solid var(--acento); outline-offset:2px; }
+        table { width:100%; border-collapse:collapse; font-size:.92rem; }
+        th, td { text-align:left; padding:.4rem .5rem; border-bottom:1px solid var(--linea); }
+        td.acciones { display:flex; gap:.4rem; }
+        #aviso { position:sticky; top:0; z-index:5; padding:.7rem 1rem; font-weight:600; display:none; }
+        #aviso.error { display:block; background:#fde8e6; color:var(--peligro); border-bottom:2px solid var(--peligro); }
+        #aviso.ok { display:block; background:#e4f4ea; color:var(--ok); border-bottom:2px solid var(--ok); }
+    </style>
+</head>
+<body>
+<div id="aviso" role="alert"></div>
+
+<header><h1>GameArena</h1></header>
+
+<main>
+    <!-- VIDEOJUEGOS: solo se crean, se ven y se buscan (sin Editar ni Eliminar) -->
+    <section>
+        <h2>Videojuegos</h2>
+        <!-- POST /videojuegos -->
+        <form id="form-videojuego">
+            <label>Nombre <input id="vj-nombre" required></label>
+            <label>Género <input id="vj-genero" required></label>
+            <button type="submit">Crear videojuego</button>
+        </form>
+        <!-- GET /videojuegos/buscar?nombre= -->
+        <form id="form-buscar-videojuego">
+            <label>Buscar por nombre <input id="vj-buscar"></label>
+            <button type="submit" class="sec">Buscar</button>
+            <!-- GET /videojuegos -->
+            <button type="button" id="vj-todos" class="sec">Ver todos</button>
+        </form>
+        <table><thead><tr><th>ID</th><th>Nombre</th><th>Género</th></tr></thead><tbody id="tabla-videojuegos"></tbody></table>
+    </section>
+
+    <section>
+        <h2>Torneos</h2>
+        <!-- POST /torneos  ·  PUT /torneos/{id} (el mismo formulario crea o modifica) -->
+        <form id="form-torneo">
+            <input type="hidden" id="t-id">
+            <label>Nombre <input id="t-nombre" required></label>
+            <label>Fecha <input id="t-fecha" type="date" required></label>
+            <label>Videojuego <select id="t-videojuego" required></select></label>
+            <label>Estado
+                <select id="t-estado" required>
+                    <option value="">Elige estado</option>
+                    <option>ABIERTO</option><option>EN_CURSO</option><option>FINALIZADO</option>
+                </select>
+            </label>
+            <button type="submit" id="t-guardar">Crear torneo</button>
+            <button type="button" id="t-cancelar" class="sec" hidden>Cancelar</button>
+        </form>
+        <!-- GET /torneos/estado/{estado} -->
+        <form id="form-filtro-torneo">
+            <label>Filtrar por estado
+                <select id="t-filtro">
+                    <option>ABIERTO</option><option>EN_CURSO</option><option>FINALIZADO</option>
+                </select>
+            </label>
+            <button type="submit" class="sec">Filtrar</button>
+            <!-- GET /torneos -->
+            <button type="button" id="t-todos" class="sec">Ver todos</button>
+        </form>
+        <!-- GET /torneos/{id} se usa al pulsar Editar  ·  DELETE /torneos/{id} al pulsar Eliminar -->
+        <table><thead><tr><th>ID</th><th>Nombre</th><th>Fecha</th><th>Videojuego</th><th>Estado</th><th></th></tr></thead><tbody id="tabla-torneos"></tbody></table>
+    </section>
+
+    <section>
+        <h2>Jugadores</h2>
+        <!-- POST /jugadores  ·  PUT /jugadores/{id} -->
+        <form id="form-jugador">
+            <input type="hidden" id="j-id">
+            <label>Nick <input id="j-nick" required></label>
+            <label>Email <input id="j-email" type="email" required></label>
+            <button type="submit" id="j-guardar">Crear jugador</button>
+            <button type="button" id="j-cancelar" class="sec" hidden>Cancelar</button>
+        </form>
+        <!-- GET /jugadores/buscar?nick= -->
+        <form id="form-buscar-jugador">
+            <label>Buscar por nick <input id="j-buscar"></label>
+            <button type="submit" class="sec">Buscar</button>
+            <!-- GET /jugadores -->
+            <button type="button" id="j-todos" class="sec">Ver todos</button>
+        </form>
+        <!-- GET /jugadores/{id} al pulsar Editar  ·  DELETE /jugadores/{id} al pulsar Eliminar -->
+        <table><thead><tr><th>ID</th><th>Nick</th><th>Email</th><th></th></tr></thead><tbody id="tabla-jugadores"></tbody></table>
+    </section>
+
+    <section>
+        <h2>Participaciones</h2>
+        <!-- POST /participaciones  ·  PUT /participaciones/{id} -->
+        <form id="form-participacion">
+            <input type="hidden" id="p-id">
+            <label>Torneo <select id="p-torneo" required></select></label>
+            <label>Jugador <select id="p-jugador" required></select></label>
+            <label>Puesto <input id="p-puesto" type="number" min="1"></label>
+            <button type="submit" id="p-guardar">Inscribir</button>
+            <button type="button" id="p-cancelar" class="sec" hidden>Cancelar</button>
+        </form>
+        <!-- GET /participaciones  ·  DELETE /participaciones/{id} -->
+        <table><thead><tr><th>ID</th><th>Torneo</th><th>Jugador</th><th>Puesto</th><th></th></tr></thead><tbody id="tabla-participaciones"></tbody></table>
+    </section>
+</main>
+
+<script src="gestion.js"></script>
+</body>
+</html>

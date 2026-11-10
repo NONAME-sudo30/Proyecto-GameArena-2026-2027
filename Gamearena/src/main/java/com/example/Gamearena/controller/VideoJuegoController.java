@@ -10,11 +10,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/videojuegos")
-public class VideojuegoController {
+public class VideoJuegoController {
 
     private final VideoJuegoService videojuegoService;
 
-    public VideojuegoController(VideoJuegoService videojuegoService) {
+    public VideoJuegoController(VideoJuegoService videojuegoService) {
         this.videojuegoService = videojuegoService;
     }
 
