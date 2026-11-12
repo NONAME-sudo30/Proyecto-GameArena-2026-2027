@@ -12,6 +12,11 @@ Pruebas simples para comprobar la API
 ### 1.4 Buscar un videojuego que no existe
 - **GET** `/videojuegos/99`
 - **Esperado:** 404.
-
+![img_2.png](img_2.png)
 ---
-
+## 2. Jugadores
+### 2.1 añadir un jugador
+- **POST** 
+- ![img_3.png](img_3.png)
+- **GET**
+- ![img_4.png](img_4.png)

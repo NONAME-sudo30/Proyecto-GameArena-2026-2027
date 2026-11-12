@@ -1,107 +1,251 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>GameArena · Torneos de videojuegos</title>
+    <title>GameArena</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --fondo:#eef1f8; --tinta:#14173b; --suave:#5a5f85; --linea:#d3d8ea; --blanco:#fff;
-            --acento:#3d4dff; --abierto:#0b8f6a; --curso:#b86b00; --final:#6b7088; --error:#b3261e;
-        }
-        * { box-sizing:border-box; }
-        html { scroll-behavior:smooth; }
-        body { margin:0; background:var(--fondo); color:var(--tinta); font-family:system-ui, "Segoe UI", sans-serif; line-height:1.55; }
-        a { color:inherit; }
-
-        #aviso { display:none; position:sticky; top:0; z-index:10; padding:.7rem 1rem; font-weight:600; background:#fde8e6; color:var(--error); border-bottom:2px solid var(--error); }
-        #aviso.visible { display:block; }
-
-        nav { display:flex; justify-content:space-between; align-items:center; padding:1rem clamp(1rem,5vw,4rem); }
-        nav strong { font-size:1.25rem; letter-spacing:-.02em; }
-        nav div { display:flex; gap:1.4rem; }
-        nav a { text-decoration:none; font-weight:600; }
-        nav a:hover { color:var(--acento); }
-
-        .hero { padding:clamp(2rem,7vw,5rem) clamp(1rem,5vw,4rem) 2rem; max-width:1100px; }
-        .hero h1 { margin:0 0 1rem; font-size:clamp(2.4rem,7vw,5rem); line-height:1; letter-spacing:-.04em; font-weight:900; }
-        .hero p { margin:0 0 1.5rem; max-width:34rem; font-size:1.15rem; color:var(--suave); }
-        .boton { display:inline-block; padding:.7rem 1.3rem; border-radius:999px; background:var(--acento); color:#fff; font-weight:700; text-decoration:none; }
-        .boton:hover { background:var(--tinta); }
-
-        section { padding:2.5rem clamp(1rem,5vw,4rem); max-width:1200px; }
-        h2 { margin:0 0 1rem; font-size:1.8rem; letter-spacing:-.02em; }
-
-        .filtros { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:1.2rem; }
-        .filtros button { font:inherit; font-weight:600; padding:.45rem 1rem; border-radius:999px; border:2px solid var(--linea); background:var(--blanco); color:var(--tinta); cursor:pointer; }
-        .filtros button[aria-pressed="true"] { background:var(--tinta); border-color:var(--tinta); color:#fff; }
-        button:focus-visible, input:focus-visible, a:focus-visible { outline:3px solid var(--acento); outline-offset:2px; }
-
-        .rejilla { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:1rem; }
-        .torneo { background:var(--blanco); border-radius:14px; padding:1.1rem 1.2rem; border-left:8px solid var(--final); display:flex; flex-direction:column; gap:.4rem; }
-        .torneo.ABIERTO { border-left-color:var(--abierto); }
-        .torneo.EN_CURSO { border-left-color:var(--curso); }
-        .torneo h3 { margin:0; font-size:1.2rem; }
-        .torneo .juego { margin:0; color:var(--suave); }
-        .estado { font-weight:700; font-size:.9rem; }
-        .ABIERTO .estado { color:var(--abierto); }
-        .EN_CURSO .estado { color:var(--curso); }
-        .FINALIZADO .estado { color:var(--final); }
-        .inscritos { margin:.4rem 0 0; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:.35rem; }
-        .inscritos li { background:var(--fondo); border-radius:6px; padding:.1rem .55rem; font-size:.88rem; }
-
-        .buscador { display:flex; gap:.5rem; margin-bottom:1.2rem; flex-wrap:wrap; }
-        .buscador input { font:inherit; padding:.55rem .9rem; border:2px solid var(--linea); border-radius:999px; min-width:min(100%,18rem); }
-        .buscador button { font:inherit; font-weight:700; padding:.55rem 1.2rem; border-radius:999px; border:0; background:var(--acento); color:#fff; cursor:pointer; }
-        .videojuego { background:var(--blanco); border-radius:14px; padding:1rem 1.2rem; }
-        .videojuego h3 { margin:0; font-size:1.1rem; }
-        .videojuego p { margin:0; color:var(--suave); }
-        .vacio { color:var(--suave); }
-
-        footer { padding:2rem clamp(1rem,5vw,4rem); color:var(--suave); font-size:.9rem; }
+        :root { --ga: #7c3aed; --neon: #00f0ff; --pink: #ff2e97; }
+        body { background: radial-gradient(circle at top, #1a1040 0%, #0a0a14 60%) fixed; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; }
+        h1, h2, .navbar-brand { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: .05em; }
+        h2 { border-left: 4px solid var(--pink); padding-left: .6rem; }
+        .navbar { background: #0d0d1f; border-bottom: 2px solid var(--neon); box-shadow: 0 0 18px rgba(0,240,255,.35); }
+        .navbar-brand { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+        .nav-link { color: #cbd5ff; text-transform: uppercase; }
+        .nav-link.active { color: #fff; border-bottom: 3px solid var(--pink); text-shadow: 0 0 8px var(--pink); }
+        .btn-primary { --bs-btn-bg: var(--ga); --bs-btn-border-color: var(--neon); --bs-btn-hover-bg: var(--pink); --bs-btn-hover-border-color: var(--pink); text-transform: uppercase; font-weight: 600; box-shadow: 0 0 10px rgba(124,58,237,.6); }
+        a { color: var(--neon); }
+        .form-control, .form-select { background: #12122b; border-color: #3b3b7a; }
+        .form-control:focus, .form-select:focus { border-color: var(--neon); box-shadow: 0 0 8px var(--neon); }
+        .table { --bs-table-bg: rgba(18,18,43,.8); }
+        .table > thead { color: var(--neon); border-bottom: 2px solid var(--pink); }
+        .fila { display: flex; gap: 1rem; overflow-x: auto; min-height: 9rem; padding: .5rem; border: 2px dashed #3b3b7a; border-radius: .5rem; }
+        .fila .tarjeta { min-width: 16rem; border: 1px solid var(--neon); border-radius: .5rem; background: #12122b; box-shadow: 0 0 12px rgba(0,240,255,.3); }
+        .estado-abierto { background: #00e676; } .estado-en_curso { background: #ff9100; } .estado-finalizado { background: #6c757d; }
+        .banner { background: linear-gradient(90deg, var(--ga), var(--pink)); color: #fff; border-radius: .5rem; box-shadow: 0 0 20px rgba(255,46,151,.5); }
     </style>
 </head>
 <body>
-<div id="aviso" role="alert"></div>
 
-<nav>
-    <strong>GameArena</strong>
-    <div><a href="#torneos">Torneos</a><a href="#videojuegos">Videojuegos</a></div>
+<nav class="navbar navbar-expand-md navbar-dark">
+    <div class="container">
+        <span class="navbar-brand fw-bold">GameArena</span>
+        <ul class="nav" id="menu">
+            <li class="nav-item"><button class="nav-link active" id="tabTorneos" type="button">Torneos</button></li>
+            <li class="nav-item"><button class="nav-link" id="tabVideojuegos" type="button">Videojuegos</button></li>
+            <li class="nav-item"><button class="nav-link" id="tabJugadores" type="button">Jugadores</button></li>
+            <li class="nav-item"><button class="nav-link" id="tabInscripciones" type="button">Inscripciones</button></li>
+        </ul>
+    </div>
 </nav>
 
-<header class="hero">
-    <h1>Juega. Compite. Sube en la clasificación.</h1>
-    <p>Mira qué torneos están abiertos, quién se ha apuntado y en qué videojuegos puedes competir.</p>
-    <a class="boton" href="#torneos">Ver torneos</a>
-</header>
+<main class="container py-4">
 
-<main>
-    <section id="torneos">
-        <h2>Torneos</h2>
-        <!-- GET /torneos  ·  GET /torneos/estado/{estado} -->
-        <div class="filtros" id="filtros">
-            <button type="button" data-estado="" aria-pressed="true">Todos</button>
-            <button type="button" data-estado="ABIERTO" aria-pressed="false">Abiertos</button>
-            <button type="button" data-estado="EN_CURSO" aria-pressed="false">En curso</button>
-            <button type="button" data-estado="FINALIZADO" aria-pressed="false">Finalizados</button>
+    <div id="aviso" class="alert alert-danger" role="alert" hidden></div>
+
+    <!-- TORNEOS (portada estilo Explorar) -->
+    <section id="panelTorneos">
+        <div class="d-md-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3 mb-2 mb-md-0">Torneos</h1>
+            <form id="formBuscarTorneo" class="input-group w-auto">
+                <input type="number" id="buscarTorneoId" class="form-control" placeholder="Buscar torneo por ID" min="1">
+                <button type="submit" id="btnBuscarTorneo" class="btn btn-primary">Buscar</button>
+                <!-- GET /torneos/{id}: aquí se buscará un torneo por ID -->
+            </form>
         </div>
-        <!-- GET /participaciones (para mostrar los inscritos de cada torneo) -->
-        <div class="rejilla" id="lista-torneos"></div>
-    </section>
 
-    <section id="videojuegos">
-        <h2>Videojuegos</h2>
-        <!-- GET /videojuegos/buscar?nombre=  ·  GET /videojuegos -->
-        <form class="buscador" id="form-buscar">
-            <input id="buscar" type="search" placeholder="Busca un videojuego" aria-label="Buscar videojuego">
-            <button type="submit">Buscar</button>
+        <form id="formFiltroTorneos" class="row g-2 mb-4">
+            <div class="col-md-5">
+                <select id="filtroEstado" class="form-select">
+                    <option value="">Estado: todos</option>
+                    <option value="ABIERTO">ABIERTO</option>
+                    <option value="EN_CURSO">EN_CURSO</option>
+                    <option value="FINALIZADO">FINALIZADO</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <select id="filtroVideojuego" class="form-select"><option value="">Videojuego: todos</option></select>
+            </div>
+            <div class="col-md-2"><button type="submit" id="btnFiltrarTorneos" class="btn btn-primary w-100">Filtrar</button></div>
+            <!-- GET /torneos/estado/{estado}: filtrar torneos por estado, videojuego o ambos -->
         </form>
-        <div class="rejilla" id="lista-videojuegos"></div>
+
+        <h2 class="h5">Popular</h2>
+        <div class="fila mb-4" id="filaPopular"></div>
+
+        <div class="d-flex justify-content-between align-items-baseline">
+            <h2 class="h5">Abierto para inscripciones</h2>
+            <a href="#">Ver todo</a>
+        </div>
+        <div class="fila mb-4" id="filaAbiertos"></div>
+
+        <h2 class="h5">Fortnite</h2>
+        <div class="fila mb-4" id="filaFortnite"></div>
+
+        <h2 class="h5">Valorant</h2>
+        <div class="fila mb-4" id="filaValorant"></div>
+
+        <h2 class="h5">Kimetsu</h2>
+        <div class="fila mb-4" id="filaKimetsu"></div>
+
+        <h2 class="h5">Minecraft</h2>
+        <div class="fila mb-4" id="filaMinecraft"></div>
+
+        <div class="banner p-4 mb-4 d-md-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="h4">Organiza tu propio torneo</h2>
+                <p class="mb-md-0">Recibe inscripciones y comparte resultados</p>
+            </div>
+            <a href="#formTorneo" class="btn btn-light">Crear torneo</a>
+        </div>
+
+        <table class="table" id="tablaTorneos">
+            <thead><tr><th>ID</th><th>Nombre</th><th>Videojuego</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="cuerpoTorneos">
+            <!-- GET /torneos: aquí se pintarán los torneos al abrir la pestaña -->
+            <!-- DELETE /torneos/{id}: botón Eliminar de cada fila -->
+            </tbody>
+        </table>
+
+        <form id="formTorneo" class="row g-2">
+            <input type="hidden" id="torneoId">
+            <div class="col-md-4"><input type="text" id="torneoNombre" class="form-control" placeholder="Nombre" required></div>
+            <div class="col-md-4">
+                <select id="torneoVideojuego" class="form-select" required>
+                    <option value=""></option>
+                    <!-- las opciones se rellenarán con la lista de videojuegos -->
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select id="torneoEstado" class="form-select" required>
+                    <option value="ABIERTO">ABIERTO</option>
+                    <option value="EN_CURSO">EN_CURSO</option>
+                    <option value="FINALIZADO">FINALIZADO</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" id="btnCrearTorneo" class="btn btn-primary">Crear torneo</button>
+                <!-- POST /torneos: aquí se creará un torneo -->
+                <button type="button" id="btnGuardarTorneo" class="btn btn-primary" hidden>Guardar cambios</button>
+                <!-- PUT /torneos/{id}: aquí se modificará un torneo -->
+            </div>
+        </form>
     </section>
+
+    <!-- VIDEOJUEGOS -->
+    <section id="panelVideojuegos" hidden>
+        <h1 class="h3 mb-3">Videojuegos</h1>
+
+        <form id="formBuscarJuego" class="input-group mb-3">
+            <input type="number" id="buscarJuegoId" class="form-control" placeholder="Buscar videojuego por ID" min="1">
+            <button type="submit" id="btnBuscarJuego" class="btn btn-primary">Buscar</button>
+            <!-- GET /videojuegos/{id}: aquí se buscará un videojuego por ID -->
+        </form>
+
+        <table class="table" id="tablaVideojuegos">
+            <thead><tr><th>ID</th><th>Imagen</th><th>Nombre</th><th>Género</th></tr></thead>
+            <tbody id="cuerpoVideojuegos">
+            <!-- GET /videojuegos: aquí se pintarán los videojuegos (con su imagen) al abrir la pestaña -->
+            </tbody>
+        </table>
+
+        <form id="formJuego" class="row g-2">
+            <div class="col-md-4"><input type="text" id="juegoNombre" class="form-control" placeholder="Nombre" required></div>
+            <div class="col-md-4"><input type="text" id="juegoGenero" class="form-control" placeholder="Género" required></div>
+            <div class="col-md-4"><input type="file" id="juegoImagen" class="form-control" accept="image/*"></div>
+            <div class="col-12">
+                <button type="submit" id="btnCrearJuego" class="btn btn-primary">Crear videojuego</button>
+                <!-- POST /videojuegos: aquí se creará un videojuego, con la imagen elegida -->
+            </div>
+        </form>
+    </section>
+
+    <!-- JUGADORES -->
+    <section id="panelJugadores" hidden>
+        <h1 class="h3 mb-3">Jugadores</h1>
+
+        <form id="formBuscarJugador" class="input-group mb-3">
+            <input type="number" id="buscarJugadorId" class="form-control" placeholder="Buscar jugador por ID" min="1">
+            <button type="submit" id="btnBuscarJugador" class="btn btn-primary">Buscar</button>
+            <!-- GET /jugadores/{id}: aquí se buscará un jugador por ID -->
+        </form>
+
+        <table class="table" id="tablaJugadores">
+            <thead><tr><th>ID</th><th>Nick</th><th>Email</th><th>Acciones</th></tr></thead>
+            <tbody id="cuerpoJugadores">
+            <!-- GET /jugadores: aquí se pintarán los jugadores al abrir la pestaña -->
+            <!-- DELETE /jugadores/{id}: botón Eliminar de cada fila -->
+            </tbody>
+        </table>
+
+        <form id="formJugador" class="row g-2">
+            <input type="hidden" id="jugadorId">
+            <div class="col-md-6"><input type="text" id="jugadorNick" class="form-control" placeholder="Nick" required></div>
+            <div class="col-md-6"><input type="email" id="jugadorEmail" class="form-control" placeholder="Email" required></div>
+            <div class="col-12">
+                <button type="submit" id="btnCrearJugador" class="btn btn-primary">Crear jugador</button>
+                <!-- POST /jugadores: aquí se creará un jugador -->
+                <button type="button" id="btnGuardarJugador" class="btn btn-primary" hidden>Guardar cambios</button>
+                <!-- PUT /jugadores/{id}: aquí se modificará un jugador -->
+            </div>
+        </form>
+    </section>
+
+    <!-- INSCRIPCIONES -->
+    <section id="panelInscripciones" hidden>
+        <h1 class="h3 mb-3">Inscripciones</h1>
+
+        <form id="formInscripcion" class="row g-2 mb-4">
+            <div class="col-md-5">
+                <select id="inscJugador" class="form-select" required>
+                    <option value="">Jugador</option>
+                    <!-- GET /jugadores: aquí se cargarán los jugadores para elegir -->
+                </select>
+            </div>
+            <div class="col-md-5">
+                <select id="inscTorneo" class="form-select" required>
+                    <option value="">Torneo</option>
+                    <!-- GET /torneos: aquí se cargarán los torneos para elegir -->
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" id="btnInscribir" class="btn btn-primary w-100">Inscribir</button>
+                <!-- POST /participaciones: aquí se inscribirá al jugador en el torneo -->
+            </div>
+        </form>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <form id="formParticipantes" class="input-group mb-2">
+                    <input type="number" id="partTorneoId" class="form-control" placeholder="ID del torneo" min="1">
+                    <button type="submit" id="btnParticipantes" class="btn btn-primary">Ver participantes</button>
+                </form>
+                <table class="table" id="tablaParticipantes">
+                    <thead><tr><th>ID</th><th>Jugador</th></tr></thead>
+                    <tbody id="cuerpoParticipantes">
+                    <!-- GET /torneos/{id}/participaciones: aquí se pintarán los participantes de un torneo -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <form id="formTorneosJugador" class="input-group mb-2">
+                    <input type="number" id="partJugadorId" class="form-control" placeholder="ID del jugador" min="1">
+                    <button type="submit" id="btnTorneosJugador" class="btn btn-primary">Ver torneos</button>
+                </form>
+                <table class="table" id="tablaTorneosJugador">
+                    <thead><tr><th>ID</th><th>Torneo</th></tr></thead>
+                    <tbody id="cuerpoTorneosJugador">
+                    <!-- GET /jugadores/{id}/participaciones: aquí se pintarán los torneos de un jugador -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
 </main>
-
-<footer>GameArena · IES Juan García Valdemora</footer>
-
-<script src="web.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
