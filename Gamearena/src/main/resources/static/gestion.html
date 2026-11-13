@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GameArena · Gestión de torneos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --tinta:#0f172a; --papel:#f8fafc; --blanco:#ffffff; --texto:#1e293b; --suave:#64748b;
+            --acento:#6366f1; --acento-osc:#4f46e5; --borde:#e2e8f0;
+            --abierto:#059669; --abierto-bg:#ecfdf5;
+            --curso:#d97706; --curso-bg:#fffbeb;
+            --final:#475569; --final-bg:#f1f5f9;
+            --peligro:#dc2626;
+            --r:12px; --s1:8px; --s2:16px; --s3:24px; --s4:40px;
+        }
+        *{box-sizing:border-box;margin:0}
+        body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-size:15px;line-height:1.6;color:var(--texto);background:var(--papel)}
+        h1,h2,h3{font-family:"Chakra Petch",system-ui,sans-serif;line-height:1.2}
+        h1{font-size:clamp(28px,5vw,40px)} h2{font-size:26px} h3{font-size:18px}
+        a{color:var(--acento)}
+        :focus-visible{outline:3px solid var(--acento);outline-offset:2px}
+
+        /* Cabecera y navegación estilo Tournify */
+        header{background:var(--tinta);color:#fff;position:sticky;top:0;z-index:5;border-bottom:1px solid rgba(255,255,255,.1)}
+        .barra{max-width:1200px;margin:auto;padding:12px var(--s2);display:flex;align-items:center;justify-content:space-between;gap:var(--s2);flex-wrap:wrap}
+        .logo{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:22px;color:#fff;text-decoration:none;display:flex;align-items:center;gap:10px}
+        .logo-icon{width:36px;height:36px;border-radius:10px;background:var(--acento);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+        nav ul{list-style:none;padding:0;display:flex;gap:6px;flex-wrap:wrap}
+        nav a{display:block;padding:8px 14px;border-radius:8px;color:#cbd5e1;text-decoration:none;font-weight:600;font-size:14px;transition:.2s}
+        nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+        nav a[aria-current="page"]{background:var(--acento);color:#fff}
+        .miga{background:var(--blanco);border-bottom:1px solid var(--borde);font-size:13px;color:var(--suave)}
+        .miga div{max-width:1200px;margin:auto;padding:10px var(--s2);display:flex;justify-content:space-between;align-items:center}
+
+        /* Indicador estado API */
+        .api-status{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:12px;padding:2px 10px;border-radius:99px}
+        .api-ok{background:var(--abierto-bg);color:var(--abierto)}
+        .api-err{background:#fef2f2;color:var(--peligro)}
+
+        /* Retícula general */
+        main{max-width:1200px;margin:auto;padding:var(--s3) var(--s2) var(--s4)}
+        section{display:none}
+        section.activa{display:block}
+        .cab-sec{display:flex;justify-content:space-between;align-items:flex-end;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s3)}
+        .cab-sec p{color:var(--suave);max-width:60ch}
+        .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3)}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+
+        /* Botones */
+        .btn{font:inherit;font-weight:700;border:2px solid transparent;border-radius:8px;padding:10px 18px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
+        .btn-p{background:var(--acento);color:#fff}.btn-p:hover{background:var(--acento-osc)}
+        .btn-s{background:transparent;color:var(--acento);border-color:var(--borde)}.btn-s:hover{background:#eef2ff;border-color:var(--acento)}
+        .btn-d{background:transparent;color:var(--peligro);border-color:var(--borde)}.btn-d:hover{background:#fef2f2;border-color:var(--peligro)}
+        .btn-sm{padding:6px 12px;font-size:13px}
+        .acciones{display:flex;gap:var(--s1);flex-wrap:wrap}
+
+        /* Tarjetas */
+        .card{background:var(--blanco);border:1px solid var(--borde);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(0,0,0,.02);transition:.2s}
+        .card:hover{box-shadow:0 10px 25px -5px rgba(0,0,0,.05)}
+        .card .cuerpo{padding:var(--s2);display:flex;flex-direction:column;gap:var(--s1);flex:1}
+        .card .cuerpo .acciones{margin-top:auto;padding-top:var(--s1)}
+        .meta{font-size:13px;color:var(--suave)}
+        .ph-banner{height:110px;background:linear-gradient(135deg,#312e81,#4338ca);color:#fff;display:flex;align-items:flex-end;padding:var(--s2);font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:18px}
+
+        /* Estados */
+        .estado{display:inline-block;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;width:fit-content;text-transform:uppercase}
+        .ABIERTO{background:var(--abierto-bg);color:var(--abierto)}
+        .EN_CURSO{background:var(--curso-bg);color:var(--curso)}
+        .FINALIZADO{background:var(--final-bg);color:var(--final)}
+
+        /* Tablas */
+        .tabla-wrap{overflow-x:auto;background:var(--blanco);border:1px solid var(--borde);border-radius:var(--r);box-shadow:0 1px 3px rgba(0,0,0,.02)}
+        table{width:100%;border-collapse:collapse;min-width:560px}
+        th,td{text-align:left;padding:14px var(--s2);border-bottom:1px solid var(--borde);font-size:14px}
+        th{background:#f8fafc;font-size:13px;font-weight:700;color:var(--suave);text-transform:uppercase;letter-spacing:.5px}
+        tr:last-child td{border-bottom:0}
+
+        /* Formularios y paneles */
+        label{display:block;font-weight:700;font-size:13px;margin-bottom:6px;color:var(--texto)}
+        input,select{font:inherit;width:100%;padding:10px 14px;border:1px solid var(--borde);border-radius:8px;background:#fff;color:var(--texto)}
+        input:focus,select:focus{border-color:var(--acento);outline:0;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+        .campo{margin-bottom:var(--s2)}
+        .msg{padding:12px var(--s2);border-radius:8px;margin-top:var(--s2);font-weight:600;font-size:14px}
+        .msg.ok{background:var(--abierto-bg);color:var(--abierto)}
+        .msg.err{background:#fef2f2;color:var(--peligro)}
+        .vacio{padding:var(--s3);text-align:center;color:var(--suave);background:var(--blanco);border:2px dashed var(--borde);border-radius:var(--r)}
+        .panel{background:var(--blanco);border:1px solid var(--borde);border-radius:var(--r);padding:var(--s3);box-shadow:0 1px 3px rgba(0,0,0,.02)}
+        .filtros{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:flex-end;margin-bottom:var(--s3)}
+        .filtros .campo{margin:0;flex:1;min-width:200px}
+        .conmuta{display:inline-flex;border:1px solid var(--borde);border-radius:8px;overflow:hidden;background:#fff}
+        .conmuta button{font:inherit;font-weight:600;border:0;padding:8px 16px;background:transparent;color:var(--suave);cursor:pointer;font-size:14px}
+        .conmuta button[aria-pressed="true"]{background:var(--acento);color:#fff}
+
+        /* Inicio y Hero */
+        .hero{background:var(--tinta);color:#fff;border-radius:var(--r);overflow:hidden;display:grid;grid-template-columns:1.2fr 1fr;margin-bottom:var(--s4);box-shadow:0 20px 25px -5px rgba(0,0,0,.1)}
+        .hero .txt{padding:var(--s4) var(--s3);display:flex;flex-direction:column;gap:var(--s2);justify-content:center}
+        .hero p{color:#94a3b8;max-width:44ch}
+        .hero-img{background:linear-gradient(135deg,#1e1b4b,#312e81);display:flex;align-items:center;justify-content:center;padding:var(--s3);color:#6366f1;font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:24px;text-align:center}
+        .cifras{display:flex;gap:var(--s3);flex-wrap:wrap;margin-top:var(--s1)}
+        .cifras strong{font-family:"Chakra Petch",sans-serif;font-size:28px;display:block;line-height:1.1;color:#fff}
+        .cifras span{font-size:13px;color:#94a3b8}
+
+        /* Modales */
+        dialog{border:0;border-radius:var(--r);padding:var(--s3);width:min(520px,92vw);box-shadow:0 25px 50px -12px rgba(0,0,0,.25)}
+        dialog::backdrop{background:rgba(15,23,42,.6);backdrop-filter:blur(4px)}
+
+        footer{background:var(--tinta);color:#94a3b8;text-align:center;padding:var(--s3) var(--s2);font-size:13px;margin-top:var(--s4);border-top:1px solid rgba(255,255,255,.1)}
+
+        @media (max-width:860px){
+            .grid{grid-template-columns:1fr 1fr}
+            .hero,.grid-2{grid-template-columns:1fr}
+        }
+        @media (max-width:560px){
+            .grid{grid-template-columns:1fr}
+            nav ul{width:100%}
+            nav a{padding:8px 10px;font-size:13px}
+            header{position:static}
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="barra">
+        <a class="logo" href="#inicio"><span class="logo-icon">GA</span>GameArena</a>
+        <nav aria-label="Navegación principal">
+            <ul>
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#torneos">Torneos</a></li>
+                <li><a href="#jugadores">Jugadores</a></li>
+                <li><a href="#videojuegos">Videojuegos</a></li>
+                <li><a href="#filtros">Filtros</a></li>
+                <li><a href="#participaciones">Inscripciones</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<div class="miga">
+    <div>
+        <span>Estás en: <strong id="ubicacion">Inicio</strong></span>
+        <span id="estadoApi" class="api-status api-err">Conectando con localhost:8080...</span>
+    </div>
+</div>
+
+<main>
+
+    <!-- INICIO -->
+    <section id="inicio">
+        <div class="hero">
+            <div class="txt">
+                <h1>Plataforma Oficial de Torneos</h1>
+                <p>Gestión avanzada conectada en tiempo real con tu API en <code>http://localhost:8080</code>.</p>
+                <div class="acciones">
+                    <a class="btn btn-p" href="#torneos">Ver torneos activos</a>
+                    <a class="btn btn-s" style="color:#fff;border-color:rgba(255,255,255,.2)" href="#participaciones">Inscribir jugador</a>
+                </div>
+                <div class="cifras" id="cifras">
+                    <div><strong>0</strong><span>torneos</span></div>
+                    <div><strong>0</strong><span>jugadores</span></div>
+                    <div><strong>0</strong><span>abiertos</span></div>
+                </div>
+            </div>
+            <div class="hero-img">GAMEARENA · H2 BACKEND</div>
+        </div>
+        <h2 style="margin-bottom:var(--s2)">Accesos directos</h2>
+        <div class="grid">
+            <div class="card"><div class="cuerpo"><h3>Torneos H2</h3><p class="meta">Administra los torneos recuperados del backend.</p><div class="acciones"><a class="btn btn-s btn-sm" href="#torneos">Gestionar</a></div></div></div>
+            <div class="card"><div class="cuerpo"><h3>Jugadores</h3><p class="meta">Listado y alta de competidores registrados.</p><div class="acciones"><a class="btn btn-s btn-sm" href="#jugadores">Gestionar</a></div></div></div>
+            <div class="card"><div class="cuerpo"><h3>Videojuegos</h3><p class="meta">Catálogo de títulos disponibles en el sistema.</p><div class="acciones"><a class="btn btn-s btn-sm" href="#videojuegos">Ver catálogo</a></div></div></div>
+        </div>
+    </section>
+
+    <!-- JUGADORES -->
+    <section id="jugadores">
+        <div class="cab-sec">
+            <div><h2>Jugadores</h2><p>Registros almacenados en la base de datos H2.</p></div>
+            <button class="btn btn-p" onclick="formJugador()">+ Añadir jugador</button>
+        </div>
+        <div class="tabla-wrap"><table>
+            <thead><tr><th>ID</th><th>Nick</th><th>Correo</th><th>País</th><th>Acciones</th></tr></thead>
+            <tbody id="tbJugadores"></tbody>
+        </table></div>
+    </section>
+
+    <!-- VIDEOJUEGOS -->
+    <section id="videojuegos">
+        <div class="cab-sec"><div><h2>Videojuegos</h2><p>Títulos soportados en la base de datos.</p></div></div>
+        <div class="grid" id="gridVideojuegos"></div>
+    </section>
+
+    <!-- TORNEOS -->
+    <section id="torneos">
+        <div class="cab-sec">
+            <div><h2>Torneos</h2><p>Lista oficial de torneos recuperada de <code>http://localhost:8080/torneos</code>.</p></div>
+            <div class="acciones">
+                <div class="conmuta" role="group">
+                    <button id="bTarj" aria-pressed="true" onclick="vista('tarjetas')">Tarjetas</button>
+                    <button id="bTab" aria-pressed="false" onclick="vista('tabla')">Tabla</button>
+                </div>
+                <button class="btn btn-p" onclick="formTorneo()">+ Crear torneo</button>
+            </div>
+        </div>
+        <div id="listaTorneos"></div>
+    </section>
+
+    <!-- FILTROS -->
+    <section id="filtros">
+        <div class="cab-sec"><div><h2>Filtrar Torneos</h2><p>Filtros dinámicos basados en los datos de tu API.</p></div></div>
+        <div class="filtros">
+            <div class="campo"><label for="fVj">Videojuego</label><select id="fVj" onchange="pintaFiltros()"></select></div>
+            <div class="campo"><label for="fEs">Estado</label>
+                <select id="fEs" onchange="pintaFiltros()">
+                    <option value="">Todos los estados</option><option>ABIERTO</option><option>EN_CURSO</option><option>FINALIZADO</option>
+                </select></div>
+            <button class="btn btn-s" onclick="limpiaFiltros()">Limpiar filtros</button>
+        </div>
+        <p class="meta" id="cuentaFiltros" style="margin-bottom:var(--s2)"></p>
+        <div class="grid" id="resFiltros"></div>
+    </section>
+
+    <!-- PARTICIPACIONES -->
+    <section id="participaciones">
+        <div class="cab-sec"><div><h2>Inscripciones y Participaciones</h2><p>Asocia jugadores a torneos abiertos en tu base de datos.</p></div></div>
+        <div class="grid-2">
+            <div class="panel">
+                <h3 style="margin-bottom:var(--s2)">Inscribir Jugador</h3>
+                <div class="campo"><label for="pJ">Jugador</label><select id="pJ"></select></div>
+                <div class="campo"><label for="pT">Torneo (Abierto)</label><select id="pT"></select></div>
+                <button class="btn btn-p" onclick="inscribir()">Realizar Inscripción</button>
+                <div id="msgPart" role="status"></div>
+            </div>
+            <div class="panel">
+                <h3 style="margin-bottom:var(--s2)">Consultar por Jugador</h3>
+                <div class="campo"><label for="cJ">Jugador</label><select id="cJ" onchange="consultaJugador()"></select></div>
+                <div id="resJugador"></div>
+            </div>
+        </div>
+        <h3 style="margin:var(--s3) 0 var(--s2)">Participantes por Torneo</h3>
+        <div class="campo" style="max-width:400px"><label for="cT">Torneo</label><select id="cT" onchange="consultaTorneo()"></select></div>
+        <div id="resTorneo"></div>
+    </section>
+
+</main>
+
+<footer>GameArena · Conectado a http://localhost:8080</footer>
+
+<dialog id="dlg"></dialog>
+
+<script>
+    const API_URL = "http://localhost:8080";
+
+    let videojuegos = [];
+    let jugadores = [];
+    let torneos = [];
+    let participaciones = [];
+    let modo = "tarjetas";
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+    const getVjId = t => t?.videojuego?.id ?? t?.videojuegoId ?? t?.vj;
+    const getJugId = p => p?.jugador?.id ?? p?.jugadorId ?? p?.j;
+    const getTorId = p => p?.torneo?.id ?? p?.torneoId ?? p?.t;
+
+    const vjDe = t => {
+        if (t?.videojuego?.nombre) return t.videojuego;
+        const id = getVjId(t);
+        return videojuegos.find(v => v.id == id) || { nombre: "Sin videojuego" };
+    };
+
+    const txtEstado = { ABIERTO: "● ABIERTO", EN_CURSO: "▶ EN CURSO", FINALIZADO: "✔ FINALIZADO" };
+    const badge = e => `<span class="estado ${e}">${txtEstado[e] || e}</span>`;
+    const fechaEs = f => f ? new Date(f).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }) : "";
+
+    /* ===== CARGA DE DATOS DESDE API_URL ===== */
+    async function cargarDatosAPI() {
+        const badgeApi = $("estadoApi");
+        try {
+            const [resVj, resJug, resTor, resPart] = await Promise.all([
+                fetch(`${API_URL}/videojuegos`).then(r => r.ok ? r.json() : []),
+                fetch(`${API_URL}/jugadores`).then(r => r.ok ? r.json() : []),
+                fetch(`${API_URL}/torneos`).then(r => r.ok ? r.json() : []),
+                fetch(`${API_URL}/participaciones`).then(r => r.ok ? r.json() : [])
+            ]);
+
+            videojuegos = Array.isArray(resVj) ? resVj : [];
+            jugadores = Array.isArray(resJug) ? resJug : [];
+            torneos = Array.isArray(resTor) ? resTor : [];
+            participaciones = Array.isArray(resPart) ? resPart : [];
+
+            badgeApi.className = "api-status api-ok";
+            badgeApi.textContent = "● Conectado (localhost:8080)";
+            refresca();
+        } catch (err) {
+            console.error("Error conectando a " + API_URL + ":", err);
+            badgeApi.className = "api-status api-err";
+            badgeApi.textContent = "● Sin conexión con localhost:8080";
+            $("listaTorneos").innerHTML = `<div class="vacio">No se pudo conectar con <strong>${API_URL}</strong>. Asegúrate de que tu servidor Spring Boot esté arrancado y tenga CORS habilitado (<code>@CrossOrigin</code>).</div>`;
+        }
+    }
+
+    /* ===== NAVEGACIÓN ===== */
+    function ruta() {
+        const id = (location.hash || "#inicio").slice(1);
+        const sec = $(id) || $("inicio");
+        document.querySelectorAll("section").forEach(s => s.classList.toggle("activa", s === sec));
+        document.querySelectorAll("nav a").forEach(a => {
+            if (a.getAttribute("href") === "#" + sec.id) a.setAttribute("aria-current", "page");
+            else a.removeAttribute("aria-current");
+        });
+        const navItem = document.querySelector(`nav a[href="#${sec.id}"]`);
+        if (navItem) $("ubicacion").textContent = navItem.textContent;
+        window.scrollTo(0, 0);
+    }
+    window.addEventListener("hashchange", ruta);
+
+    /* ===== RENDERIZADO ===== */
+    function tarjetaTorneo(t) {
+        const vj = vjDe(t);
+        return `<article class="card">
+    <div class="ph-banner">${esc(vj.nombre)}</div>
+    <div class="cuerpo">
+      ${badge(t.estado)}
+      <h3>${esc(t.nombre)}</h3>
+      <p class="meta">${esc(vj.nombre)} · ${fechaEs(t.fecha)}</p>
+      <p class="meta">Premio: <strong>${esc(t.premio || "Sin definir")}</strong></p>
+      <div class="acciones"><button class="btn btn-s btn-sm" onclick="fichaTorneo(${t.id})">Ver detalle</button></div>
+    </div>
+  </article>`;
+    }
+
+    function tablaTorneos(lista) {
+        return `<div class="tabla-wrap"><table><thead><tr><th>Torneo</th><th>Videojuego</th><th>Fecha</th><th>Premio</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>` +
+            lista.map(t => {
+                const vj = vjDe(t);
+                return `<tr><td><strong>${esc(t.nombre)}</strong></td><td>${esc(vj.nombre)}</td><td>${fechaEs(t.fecha)}</td><td>${esc(t.premio)}</td><td>${badge(t.estado)}</td>
+    <td><button class="btn btn-s btn-sm" onclick="fichaTorneo(${t.id})">Ver detalle</button></td></tr>`;
+            }).join("") + `</tbody></table></div>`;
+    }
+
+    function pintaInicio() {
+        const abiertos = torneos.filter(t => t.estado === "ABIERTO").length;
+        $("cifras").innerHTML = `<div><strong>${torneos.length}</strong><span>torneos</span></div><div><strong>${jugadores.length}</strong><span>jugadores</span></div><div><strong>${abiertos}</strong><span>abiertos</span></div>`;
+    }
+
+    function pintaJugadores() {
+        $("tbJugadores").innerHTML = jugadores.length ? jugadores.map(j => `<tr>
+    <td>#${j.id}</td>
+    <td><strong>${esc(j.nick)}</strong></td>
+    <td>${esc(j.email)}</td>
+    <td>${esc(j.pais || "-")}</td>
+    <td><div class="acciones">
+      <button class="btn btn-s btn-sm" onclick="fichaJugador(${j.id})">Ver</button>
+      <button class="btn btn-s btn-sm" onclick="formJugador(${j.id})">Editar</button>
+      <button class="btn btn-d btn-sm" onclick="borraJugador(${j.id})">Eliminar</button>
+    </div></td></tr>`).join("") : `<tr><td colspan="5"><div class="vacio">No hay jugadores en la base de datos H2.</div></td></tr>`;
+    }
+
+    function pintaVideojuegos() {
+        $("gridVideojuegos").innerHTML = videojuegos.length ? videojuegos.map(v => `<article class="card">
+    <div class="ph-banner">${esc(v.nombre)}</div>
+    <div class="cuerpo">
+      <h3>${esc(v.nombre)}</h3>
+      <p class="meta">${esc(v.genero || "")}</p>
+      <p class="meta">${torneos.filter(t => getVjId(t) == v.id).length} torneos asociados</p>
+    </div>
+  </article>`).join("") : `<div class="vacio" style="grid-column:1/-1">No hay videojuegos en la base de datos H2.</div>`;
+    }
+
+    function pintaTorneos() {
+        $("listaTorneos").innerHTML = torneos.length ? (modo === "tarjetas" ? `<div class="grid">${torneos.map(tarjetaTorneo).join("")}</div>` : tablaTorneos(torneos)) : `<div class="vacio">No hay torneos en la base de datos H2.</div>`;
+    }
+
+    function vista(m) {
+        modo = m;
+        $("bTarj").setAttribute("aria-pressed", m === "tarjetas");
+        $("bTab").setAttribute("aria-pressed", m === "tabla");
+        pintaTorneos();
+    }
+
+    function pintaFiltros() {
+        const vj = $("fVj").value, es = $("fEs").value;
+        const l = torneos.filter(t => (!vj || getVjId(t) == vj) && (!es || t.estado === es));
+        $("cuentaFiltros").textContent = l.length + (l.length === 1 ? " torneo encontrado" : " torneos encontrados");
+        $("resFiltros").innerHTML = l.length ? l.map(tarjetaTorneo).join("") : `<div class="vacio" style="grid-column:1/-1">No hay torneos con esos filtros.</div>`;
+    }
+
+    function limpiaFiltros() {
+        $("fVj").value = "";
+        $("fEs").value = "";
+        pintaFiltros();
+    }
+
+    function pintaSelects() {
+        const opJ = jugadores.map(j => `<option value="${j.id}">${esc(j.nick)}</option>`).join("");
+        $("pJ").innerHTML = opJ || `<option value="">Sin jugadores</option>`;
+        $("cJ").innerHTML = opJ || `<option value="">Sin jugadores</option>`;
+
+        const torneosAbiertos = torneos.filter(t => t.estado === "ABIERTO");
+        $("pT").innerHTML = torneosAbiertos.length ? torneosAbiertos.map(t => `<option value="${t.id}">${esc(t.nombre)}</option>`).join("") : `<option value="">No hay torneos abiertos</option>`;
+        $("cT").innerHTML = torneos.length ? torneos.map(t => `<option value="${t.id}">${esc(t.nombre)}</option>`).join("") : `<option value="">Sin torneos</option>`;
+
+        $("fVj").innerHTML = `<option value="">Todos los videojuegos</option>` + videojuegos.map(v => `<option value="${v.id}">${esc(v.nombre)}</option>`).join("");
+    }
+
+    /* ===== ACCIONES / PETICIONES A API ===== */
+    async function inscribir() {
+        const jugadorId = $("pJ").value, torneoId = $("pT").value, m = $("msgPart");
+        if (!jugadorId || !torneoId) {
+            m.innerHTML = `<div class="msg err">Selecciona un jugador y un torneo válido.</div>`;
+            return;
+        }
+        try {
+            const res = await fetch(`${API_URL}/participaciones`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    jugadorId: +jugadorId,
+                    torneoId: +torneoId,
+                    jugador: { id: +jugadorId },
+                    torneo: { id: +torneoId }
+                })
+            });
+            if (res.ok) {
+                m.innerHTML = `<div class="msg ok">¡Inscripción guardada en H2!</div>`;
+                await cargarDatosAPI();
+            } else {
+                const errTxt = await res.text();
+                m.innerHTML = `<div class="msg err">Error al inscribir: ${esc(errTxt) || 'Comprueba los datos'}</div>`;
+            }
+        } catch (e) {
+            m.innerHTML = `<div class="msg err">Error de conexión con ${API_URL}.</div>`;
+        }
+    }
+
+    function consultaJugador() {
+        const jId = +$("cJ").value;
+        const misPart = participaciones.filter(p => getJugId(p) == jId);
+        const ts = misPart.map(p => torneos.find(t => t.id == getTorId(p))).filter(Boolean);
+
+        $("resJugador").innerHTML = ts.length ? `<ul style="list-style:none;padding:0;display:grid;gap:8px">` +
+            ts.map(t => `<li class="meta" style="display:flex;justify-content:space-between;align-items:center"><strong style="color:var(--texto)">${esc(t.nombre)}</strong>${badge(t.estado)}</li>`).join("") + `</ul>` :
+            `<div class="vacio">Este jugador no participa en ningún torneo.</div>`;
+    }
+
+    function consultaTorneo() {
+        const tId = +$("cT").value;
+        const misPart = participaciones.filter(p => getTorId(p) == tId);
+        const js = misPart.map(p => jugadores.find(j => j.id == getJugId(p))).filter(Boolean);
+
+        $("resTorneo").innerHTML = js.length ? `<div class="tabla-wrap"><table><thead><tr><th>Nick</th><th>País</th></tr></thead><tbody>` +
+            js.map(j => `<tr><td><strong>${esc(j.nick)}</strong></td><td>${esc(j.pais || "-")}</td></tr>`).join("") + `</tbody></table></div>` :
+            `<div class="vacio">Este torneo no tiene participantes inscritos todavía.</div>`;
+    }
+
+    /* MODALES DE DETALLE Y FORMULARIOS */
+    function abre(html) {
+        $("dlg").innerHTML = html + `<div class="acciones" style="margin-top:var(--s3)"><button class="btn btn-s" onclick="$('dlg').close()">Cerrar</button></div>`;
+        $("dlg").showModal();
+    }
+
+    function fichaJugador(id) {
+        const j = jugadores.find(x => x.id == id);
+        const misPart = participaciones.filter(p => getJugId(p) == id);
+        const ts = misPart.map(p => torneos.find(t => t.id == getTorId(p))).filter(Boolean);
+        abre(`<h3>${esc(j.nick)}</h3><p class="meta">${esc(j.email)} · ${esc(j.pais || "Sin país")}</p>
+  <h3 style="font-size:15px;margin:var(--s2) 0 var(--s1)">Torneos inscritos</h3>
+  ${ts.length ? ts.map(t => `<p>${esc(t.nombre)} ${badge(t.estado)}</p>`).join("") : `<p class="meta">Sin torneos activos.</p>`}`);
+    }
+
+    function fichaTorneo(id) {
+        const t = torneos.find(x => x.id == id);
+        const vj = vjDe(t);
+        const n = participaciones.filter(p => getTorId(p) == id).length;
+        abre(`${badge(t.estado)}<h3 style="margin:var(--s1) 0">${esc(t.nombre)}</h3>
+  <p class="meta">Videojuego: <strong>${esc(vj.nombre)}</strong></p>
+  <p style="margin-top:var(--s1)">Fecha: <strong>${fechaEs(t.fecha)}</strong></p>
+  <p>Premio: <strong>${esc(t.premio)}</strong></p>
+  <p>Participantes inscritos: <strong>${n}</strong></p>
+  <div class="acciones" style="margin-top:var(--s2)">
+    <button class="btn btn-s btn-sm" onclick="formTorneo(${t.id})">Editar</button>
+    <button class="btn btn-d btn-sm" onclick="borraTorneo(${t.id})">Eliminar</button>
+  </div>`);
+    }
+
+    function formJugador(id) {
+        const j = id ? jugadores.find(x => x.id == id) : { nick: "", email: "", pais: "" };
+        $("dlg").innerHTML = `<h3 style="margin-bottom:var(--s2)">${id ? "Editar Jugador" : "Nuevo Jugador"}</h3>
+  <div class="campo"><label>Nick</label><input id="fn" value="${esc(j.nick)}" required></div>
+  <div class="campo"><label>Correo</label><input id="fe" type="email" value="${esc(j.email)}" required></div>
+  <div class="campo"><label>País</label><input id="fp" value="${esc(j.pais)}"></div>
+  <div id="errF"></div>
+  <div class="acciones" style="margin-top:var(--s2)"><button class="btn btn-p" onclick="guardaJugador(${id || 0})">Guardar</button><button class="btn btn-s" onclick="$('dlg').close()">Cancelar</button></div>`;
+        $("dlg").showModal();
+    }
+
+    async function guardaJugador(id) {
+        const nick = $("fn").value.trim(), email = $("fe").value.trim(), pais = $("fp").value.trim();
+        if (!nick || !email) {
+            $("errF").innerHTML = `<div class="msg err">Nick y correo son obligatorios.</div>`;
+            return;
+        }
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${API_URL}/jugadores/${id}` : `${API_URL}/jugadores`;
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nick, email, pais })
+            });
+            if (res.ok) {
+                $("dlg").close();
+                await cargarDatosAPI();
+            } else {
+                $("errF").innerHTML = `<div class="msg err">Error al guardar en ${API_URL}.</div>`;
+            }
+        } catch (e) {
+            $("errF").innerHTML = `<div class="msg err">Error de conexión con la API.</div>`;
+        }
+    }
+
+    async function borraJugador(id) {
+        if (!confirm("¿Seguro que deseas eliminar este jugador?")) return;
+        try {
+            const res = await fetch(`${API_URL}/jugadores/${id}`, { method: 'DELETE' });
+            if (res.ok) await cargarDatosAPI();
+            else alert("No se pudo eliminar el jugador.");
+        } catch (e) {
+            alert("Error de conexión con " + API_URL);
+        }
+    }
+
+    function formTorneo(id) {
+        const t = id ? torneos.find(x => x.id == id) : { nombre: "", videojuegoId: videojuegos[0]?.id || 1, estado: "ABIERTO", fecha: "", premio: "" };
+        const currentVjId = getVjId(t);
+        $("dlg").innerHTML = `<h3 style="margin-bottom:var(--s2)">${id ? "Editar Torneo" : "Crear Torneo"}</h3>
+  <div class="campo"><label>Nombre</label><input id="tn" value="${esc(t.nombre)}"></div>
+  <div class="campo"><label>Videojuego</label><select id="tv">${videojuegos.map(v => `<option value="${v.id}" ${v.id == currentVjId ? "selected" : ""}>${esc(v.nombre)}</option>`).join("")}</select></div>
+  <div class="campo"><label>Estado</label><select id="te">${["ABIERTO", "EN_CURSO", "FINALIZADO"].map(e => `<option ${e === t.estado ? "selected" : ""}>${e}</option>`).join("")}</select></div>
+  <div class="campo"><label>Fecha</label><input id="tf" type="date" value="${t.fecha ? t.fecha.split('T')[0] : ''}"></div>
+  <div class="campo"><label>Premio</label><input id="tp" value="${esc(t.premio)}"></div>
+  <div id="errF"></div>
+  <div class="acciones"><button class="btn btn-p" onclick="guardaTorneo(${id || 0})">Guardar</button><button class="btn btn-s" onclick="$('dlg').close()">Cancelar</button></div>`;
+        $("dlg").showModal();
+    }
+
+    async function guardaTorneo(id) {
+        const vjId = +$("tv").value;
+        const data = {
+            nombre: $("tn").value.trim(),
+            videojuegoId: vjId,
+            videojuego: { id: vjId },
+            estado: $("te").value,
+            fecha: $("tf").value,
+            premio: $("tp").value.trim()
+        };
+        if (!data.nombre || !data.fecha) {
+            $("errF").innerHTML = `<div class="msg err">El nombre y la fecha son obligatorios.</div>`;
+            return;
+        }
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${API_URL}/torneos/${id}` : `${API_URL}/torneos`;
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                $("dlg").close();
+                await cargarDatosAPI();
+            } else {
+                $("errF").innerHTML = `<div class="msg err">Error al guardar el torneo en H2.</div>`;
+            }
+        } catch (e) {
+            $("errF").innerHTML = `<div class="msg err">Error de conexión con la API.</div>`;
+        }
+    }
+
+    async function borraTorneo(id) {
+        if (!confirm("¿Eliminar este torneo permanentemente?")) return;
+        try {
+            const res = await fetch(`${API_URL}/torneos/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                $("dlg").close();
+                await cargarDatosAPI();
+            } else {
+                alert("No se pudo eliminar el torneo.");
+            }
+        } catch (e) {
+            alert("Error de conexión con " + API_URL);
+        }
+    }
+
+    function refresca() {
+        const vj = $("fVj").value;
+        pintaSelects();
+        $("fVj").value = vj;
+        pintaInicio();
+        pintaJugadores();
+        pintaVideojuegos();
+        pintaTorneos();
+        pintaFiltros();
+        if (jugadores.length > 0) consultaJugador();
+        if (torneos.length > 0) consultaTorneo();
+    }
+
+    // Arranque inicial
+    cargarDatosAPI();
+    ruta();
+</script>
+</body>
+</html>

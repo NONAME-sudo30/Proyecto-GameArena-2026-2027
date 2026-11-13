@@ -9,4 +9,4 @@ public class GamearenaApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(GamearenaApplication.class, args);
 	}
-}
+	}

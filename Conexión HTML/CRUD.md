@@ -22,7 +22,7 @@ Este documento detalla la estructura de datos y los endpoints necesarios para ge
   "nombre": "Valorant",
   "genero": "Shooter Táctico",
   "plataforma": "PC",
-  "desarrollador": "Riot Games"
+
 }
 ```
 
@@ -48,71 +48,72 @@ Este documento detalla la estructura de datos y los endpoints necesarios para ge
 
 ## 3. CRUD: Jugadores (`/Localhost:8080/jugadores`)
 
-### Modelo JSON
+### Modelo JSON DE JUGADORES
 ```json
 {
   "id": 101,
   "nickname": "ShadowSlayer",
-  "nombre_real": "Carlos Pérez",
   "email": "carlos.perez@ejemplo.com",
-  "pais": "España",
-  "fecha_registro": "2026-11-13"
-}
+  
 ```
 
 ### Endpoints
 
-| Método | Endpoint | Descripción | Código Éxito |
-| :--- | :--- | :--- | :--- |
-| **POST** | `/api/jugadores` | Crear el perfil de un nuevo jugador. | `201 Created` |
-| **GET** | `/api/jugadores` | Obtener el listado completo de jugadores. | `200 OK` |
-| **GET** | `/api/jugadores/{id}` | Consultar el perfil de un jugador por su ID. | `200 OK` |
-| **PUT** | `/api/jugadores/{id}` | Modificar datos de un jugador (ej. cambiar nickname). | `200 OK` |
-| **DELETE** | `/api/jugadores/{id}` | Dar de baja / eliminar un jugador. | `204 No Content` |
+| Método | Endpoint                    | Descripción | Código Éxito |
+| :--- |:----------------------------| :--- | :--- |
+| **POST** | `/localhost:8080/jugadores` | Crear el perfil de un nuevo jugador. | `201 Created` |
+| **GET** | `/localhost:8080/jugadores`            | Obtener el listado completo de jugadores. | `200 OK` |
+| **GET** | `/localhost:8080/jugadores/{id}`       | Consultar el perfil de un jugador por su ID. | `200 OK` |
 
----
+**POST**
+![POST JUGADORES](../../../Pictures/Screenshots/Captura%20de%20pantalla%202026-11-13%20174438.png)
+**GET**
+![GET JUGADORES](../../../Pictures/Screenshots/Captura%20de%20pantalla%202026-11-13%20174723.png)
+**GET ID**
+![GET ID](../../../Pictures/Screenshots/Captura%20de%20pantalla%202026-11-13%20174908.png)
+## 4. CRUD: Torneos (`/Localhost:8080/torneos`)
 
-## 4. CRUD: Torneos (`/api/torneos`)
-
-### Modelo JSON
+### Modelo JSON de torneos
 ```json
 {
-  "id": 500,
   "nombre": "Copa de Invierno 2026",
   "videojuego_id": 1,
-  "fecha_inicio": "2026-12-01T18:00:00Z",
-  "fecha_fin": "2026-12-15T22:00:00Z",
-  "premio_total": 1500.00,
-  "max_jugadores": 32,
+  "fecha": "2026-12-01",
+  "premio": 1500.00,
   "estado": "ABIERTO"
 }
 ```
 
 ### Endpoints
 
-| Método | Endpoint | Descripción | Código Éxito |
-| :--- | :--- | :--- | :--- |
-| **POST** | `/api/torneos` | Crear un nuevo torneo asociado a un `videojuego_id`. | `201 Created` |
-| **GET** | `/api/torneos` | Listar todos los torneos (admite filtros por estado o juego). | `200 OK` |
-| **GET** | `/api/torneos/{id}` | Obtener detalles del torneo y su videojuego asociado. | `200 OK` |
-| **PUT** | `/api/torneos/{id}` | Actualizar fechas, premios o estado del torneo. | `200 OK` |
-| **DELETE** | `/api/torneos/{id}` | Cancelar y eliminar un torneo. | `204 No Content` |
+| Método | Endpoint                  | Descripción | Código Éxito |
+| :--- |:--------------------------| :--- | :--- |
+| **POST** | `/localhost:8080/torneos` | Crear un nuevo torneo asociado a un `videojuego_id`. | `201 Created` |
+| **GET** | `/localhost:8080/torneos`            | Listar todos los torneos (admite filtros por estado o juego). | `200 OK` |
+| **GET** | `/localhost:8080/torneos/{id}`       | Obtener detalles del torneo y su videojuego asociado. | `200 OK` |
+
+**GET**
+![GET](../../../Pictures/Screenshots/Captura%20de%20pantalla%202026-11-13%20175523.png)
+**POST**
+![POST ](../../../Pictures/Screenshots/Captura%20de%20pantalla%202026-11-13%20175820.png)
+**GET ID**
+![GET ID](../../../Pictures/Screenshots/Captura%20de%20pantalla%202026-11-13%20183732.png)
 
 ---
 
 ## 5. Gestión de Inscripciones (Relación Torneo - Jugador)
 
-Para gestionar la relación muchos a muchos ($N:M$) entre **Torneos** y **Jugadores**, se utilizan rutas anidadas:
+| Método | Endpoint                                          | Descripción | Código Éxito |
+| :--- |:--------------------------------------------------| :--- | :--- |
+| **POST** | `/Localhost:8080/torneos/{id_torneo}/jugadores`   | Inscribir un jugador al torneo (Body: `{"jugador_id": 101}`). | `201 Created` |
+| **GET** | `/Localhost:8080/torneos/{id_torneo}/jugadores`              | Listar todos los jugadores inscritos en un torneo. | `200 OK` |
+| **GET** | `/Localhost:8080/jugadores/{id_jugador}/torneos`             | Listar todos los torneos en los que participa un jugador. | `200 OK` |
 
-| Método | Endpoint | Descripción | Código Éxito |
-| :--- | :--- | :--- | :--- |
-| **POST** | `/api/torneos/{id_torneo}/jugadores` | Inscribir un jugador al torneo (Body: `{"jugador_id": 101}`). | `201 Created` |
-| **GET** | `/api/torneos/{id_torneo}/jugadores` | Listar todos los jugadores inscritos en un torneo. | `200 OK` |
-| **GET** | `/api/jugadores/{id_jugador}/torneos` | Listar todos los torneos en los que participa un jugador. | `200 OK` |
-| **DELETE** | `/api/torneos/{id_torneo}/jugadores/{id_jugador}` | Desinscribir o expulsar a un jugador de un torneo. | `204 No Content` |
-
+**GET TORNEOS EN VIDEOJUEGOS**
+![Torneos con videojuegos 3](../../../Pictures/Screenshots/Captura%20de%20pantalla%202026-11-13%20184309.png)
+**POST INCRIBIR JUGADOR EN TORNEO**
+![Inscribir](../../../Pictures/Screenshots/Captura%20de%20pantalla%202026-11-13%20184602.png)
 ---
-
 ## 6. Códigos de Error Comunes
 
 * **`400 Bad Request`:** Datos enviados inválidos (ej. intentar crear un torneo sin `videojuego_id` o con fecha de fin anterior a la de inicio).
